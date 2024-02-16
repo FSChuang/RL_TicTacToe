@@ -4,6 +4,8 @@ import torch.nn as nn
 import torch.optim as optim
 import torch.nn.functional as F
 import os
+from game_AI import TicTacToe_AI, Player
+import random
 
 class Linear(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -24,5 +26,7 @@ class Linear(nn.Module):
         torch.save(self.state_dict(), file_name)
 
 
-class Qtrainer:
-    def __init__(self, model, lr, gamma):
+if __name__ == '__main__':
+    game = TicTacToe_AI()
+    currentPlayer = Player.P1
+

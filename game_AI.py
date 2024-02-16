@@ -74,13 +74,13 @@ class TicTacToe_AI:
     def _draw_flags(self):
         for row in range(3):
             for col in range(3):
-                if self.board[row][col] == Player.p1:
+                if self.board[row][col] == Player.P1:
                     pygame.draw.line(self.display, RED, (Cell_Size*row + Cross_Space, Cell_Size*col + Cross_Space),
                                      (Cell_Size*row + Cell_Size - Cross_Space, Cell_Size*col + Cell_Size - Cross_Space), Cross_Width)
                     pygame.draw.line(self.display, RED, (Cell_Size*row + Cross_Space, Cell_Size*col + Cell_Size - Cross_Space), 
                                      (Cell_Size*row + Cell_Size - Cross_Space, Cell_Size*col + Cross_Space), Cross_Width)
                     
-                elif self.board[row][col] == Player.p2:
+                elif self.board[row][col] == Player.P2:
                     pygame.draw.circle(self.display, color = Circle_Color, center = (Cell_Size*row + Cell_Size//2, Cell_Size*col + Cell_Size//2), radius = Cricle_Radius, width = Circle_Width)
 
     def _update_ui(self):
@@ -90,6 +90,7 @@ class TicTacToe_AI:
         pygame.display.flip()
 
     def _game_play(self, action):
+        print(self.board)
         reward = 0 
         game_over = False
         # 1. Collect User input
@@ -98,7 +99,7 @@ class TicTacToe_AI:
                 pygame.quit()
                 sys.exit()
 
-        # 2.move
+        # 2.move / if ai choose the occupied place, end the game and return a negative reward
         if self.board[movement[np.argmax(action)][0]][movement[np.argmax(action)][1]] != " ":
             reward = -10
             game_over = True
@@ -108,7 +109,7 @@ class TicTacToe_AI:
         # 3. Check if the game is over
         reward = 0 
         game_over = False
-        if self._game_is_over()[0] == True:
+        if self._game_is_over(self.player)[0] == True:
             game_over = True
             if self._game_is_over()[1] == self.player:
                 reward = 10
