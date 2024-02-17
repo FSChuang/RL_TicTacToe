@@ -12,9 +12,9 @@ BLACK = (0, 0, 0)
 BLUE = (0, 0, 255)
 RED = (255, 0, 0)
 
-movement = {0: (0, 0), 1: (0, 1), 2: (0, 2),
-            3: (1, 0), 4: (1, 1), 5: (1, 2),
-            6: (2, 0), 7: (2, 1), 8: (2, 2)}
+movement = {0: (0, 0), 1: (1, 0), 2: (2, 0),
+            3: (0, 1), 4: (1, 1), 5: (2, 1),
+            6: (0, 2), 7: (1, 2), 8: (2, 2)}
 
 # Board constants
 Width, Height = 600, 600
@@ -31,8 +31,9 @@ Cross_Width = 30
 
 # AI side
 class Player(Enum):
-    P1 = 'X'
-    P2 = 'O'
+    P1 = 0 # 'X'
+    P2 = 1 # 'O'
+    SPARE = 2 # spare
 
 # game
 class TicTacToe_AI:
@@ -43,8 +44,9 @@ class TicTacToe_AI:
         self.display = pygame.display.set_mode((self.w, self.h))
         pygame.display.set_caption("Tic Tac Toe")
 
-        self.board = [[" " for row in range(3)] for col in range(3)]
+        self.board = [[Player.SPARE for row in range(3)] for col in range(3)]
         self.player = Player.P1
+        random.seed(a = None, version = 2)
     
     def _game_is_over(self, player):
         for row in range(3):
@@ -57,14 +59,22 @@ class TicTacToe_AI:
         if all([self.board[i][i] == player for i in range(3)]) or all([self.board[i][2-i] == player for i in range(3)]):
             return True, player
         
-        if all([cell != " " for row in self.board for cell in row]):
+        if all([cell != Player.SPARE for row in self.board for cell in row]):
             return True, 'Tie'
         
         return False, None
 
     def _move(self, action):
-        
         self.board[movement[np.argmax(action)][0]][movement[np.argmax(action)][1]] = self.player
+
+    def _opponent_move(self):
+        self.player = Player.P2
+        opponent = random.randint(0, 8)
+        while self.board[movement[opponent][0]][movement[opponent][1]] != Player.SPARE:
+            opponent = random.randint(0, 8)
+        self.board[movement[opponent][0]][movement[opponent][1]] = self.player
+        self.player = Player.P1
+        self._update_ui()
 
     def _draw_grid(self):
         for row in range(1, 3):
@@ -89,9 +99,12 @@ class TicTacToe_AI:
         self._draw_flags()
         pygame.display.flip()
 
+    def _reset(self):
+        self.board = [[Player.SPARE for row in range(3)] for col in range(3)]
+
     def _game_play(self, action):
-        print(self.board)
-        reward = 0 
+        #action = [], size = 9
+        reward = 0
         game_over = False
         # 1. Collect User input
         for event in pygame.event.get():
@@ -99,28 +112,36 @@ class TicTacToe_AI:
                 pygame.quit()
                 sys.exit()
 
+        if self._game_is_over(Player.P2)[0] == True:
+            #print(self._game_is_over(Player.P2))
+            return -15, True
+        
         # 2.move / if ai choose the occupied place, end the game and return a negative reward
-        if self.board[movement[np.argmax(action)][0]][movement[np.argmax(action)][1]] != " ":
-            reward = -10
+        if self.board[movement[np.argmax(action)][0]][movement[np.argmax(action)][1]] != Player.SPARE:
+            reward = -20
             game_over = True
-            return game_over, reward
+            print("NUMB")
+            return reward, game_over
         self._move(action)
-
+        reward = 1
         # 3. Check if the game is over
-        reward = 0 
         game_over = False
         if self._game_is_over(self.player)[0] == True:
             game_over = True
-            if self._game_is_over()[1] == self.player:
+            print(self._game_is_over(self.player))
+            if self._game_is_over(self.player)[1] == self.player:
+                reward = 20
+            elif self._game_is_over(self.player)[1] == 'tie':
                 reward = 10
-            elif self._game_is_over()[1] == 'tie':
-                reward = 8
             else:
                 reward = -10
-            return game_over, reward
-        
+            #return reward, game_over
+
         
         # 4.update ui
+        #print(self.board)
         self._update_ui()
+        
+        return reward, game_over
 
         
