@@ -91,7 +91,7 @@ def train():
                 agent.train_long_memory()
                 agent.n_games += 1
 
-            if agent.n_games > 4000:
+            if agent.n_games > 10000:
                 sleep_time = 1
 
                 
